@@ -1,0 +1,113 @@
+﻿@page "/ConsultaAporte";
+
+@inject AportesBLL aportesBLL;
+
+<div class="card-header row">
+    <div class="col-md-4">
+        <label>Desde: </label>
+        <InputDate @bind-Value="Desde" class="form-control id-input"></InputDate>
+    </div>
+    <div class="col-md-4">
+        <label>Hasta: </label>
+        <InputDate @bind-Value="Hasta" class="form-control id-input"></InputDate>
+    </div>
+    <label>Filtrar Por:</label>
+    <div class="col-md-6 input-group filter-input">
+        <InputSelect @bind-Value="Filtro" class="form-select">
+            <option value="0">Fecha</option>
+            <option value="1">Aporte Id</option>
+            <option value="2">Persona</option>
+        </InputSelect>
+        <div class="input-group-append">
+            <button type="button" class="btn btn-dark oi oi-magnifying-glass" @onclick="Buscar"></button>
+            <button type="button" class="btn btn-dark oi oi-reload" @onclick="Reiniciar"></button>
+        </div>
+    </div>
+    <div class="col-md-6">
+        @switch (Filtro)
+        {
+            case 1:
+                <InputNumber @bind-Value="aportes.AporteId" class="form-control"></InputNumber>
+                break;
+            case 2:
+                <InputText @bind-Value="aportes.Persona" class="form-control"></InputText>
+            break;
+        }
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Aporte ID</th>
+                <th>Persona</th>
+                <th>Monto</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in ListaAportes)
+            {
+                <tr>
+                    <td><a href="RegistroAporte/@item.AporteId">Ver</a></td>
+                    <td>@item.AporteId</td>
+                    <td>@item.Persona</td>
+                    <td>@item.Monto</td>
+                </tr>
+
+                MontoTotal += item.Monto;
+            }
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Total: @MontoTotal</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+@code 
+{
+    public int Filtro { get; set; }
+    public Aportes aportes { get; set; } = new Aportes();
+    public List<Aportes> ListaAportes { get; set; } = new List<Aportes>();
+    public float MontoTotal { get; set; }
+
+    public DateTime Desde { get; set; }
+    public DateTime Hasta { get; set; }
+
+    protected override void OnInitialized()
+    {
+        ListaAportes = aportesBLL.Listar(a => true);
+        Desde = DateTime.Now.AddMonths(-1);
+        Hasta = DateTime.Now;
+    }
+
+    public void Buscar()
+    {
+        MontoTotal = 0;
+        if (Filtro == 0)
+        {
+            ListaAportes = aportesBLL.Listar(l => l.Fecha >= Desde.Date && l.Fecha <= Hasta);
+        }
+        else
+        if (Filtro == 1)
+        {
+            ListaAportes = aportesBLL.Listar(l => l.AporteId == aportes.AporteId && l.Fecha >= Desde.Date && l.Fecha <= Hasta);
+        }
+        else
+        if (Filtro == 2)
+        {
+            ListaAportes = aportesBLL.Listar(l => l.Persona == aportes.Persona && l.Fecha >= Desde.Date && l.Fecha <= Hasta);
+        }
+    }
+
+    public void Reiniciar()
+    {
+        MontoTotal = 0;
+        ListaAportes = aportesBLL.Listar(a => true);
+    }
+}
