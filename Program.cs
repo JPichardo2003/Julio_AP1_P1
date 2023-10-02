@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using Julio_AP1_P1.DAL;
 using Radzen;
+using Julio_AP1_P1.BLL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,7 @@ builder.Services.AddServerSideBlazor();
 var ConStr = builder.Configuration.GetConnectionString("ConStr");
 
 builder.Services.AddDbContext<Context>(op => op.UseSqlite(ConStr));
-
+builder.Services.AddScoped<AportesBLL>();
 builder.Services.AddScoped<NotificationService>();
 
 var app = builder.Build();
