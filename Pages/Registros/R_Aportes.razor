@@ -1,0 +1,144 @@
+﻿@page "/RegistroAporte";
+@page "/RegistroAporte/{AporteId:int}";
+
+@inject AportesBLL aportesBLL;
+@inject NotificationService notificationService;
+
+<EditForm Model="aportes" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator/>
+    <div class="card">
+        <div class="card-header">
+            <h1>Registro Cliente</h1>
+        </div>
+        <div class="card-body">
+            <label>Aporte ID:</label>
+            <div class="input-group">
+                <InputNumber @bind-Value="aportes.AporteId" class="id-input"></InputNumber>
+                <button type="button" class="btn btn-dark oi oi-magnifying-glass" @onclick="Buscar"></button>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Fecha:</label>
+                    <InputDate @bind-Value="aportes.Fecha" class="form-control"></InputDate>
+                    <ValidationMessage For="@(() => aportes.Fecha)"/>
+                </div>
+                <div class="col-md-6">
+                    <label>Persona:</label>
+                    <InputText @bind-Value="aportes.Persona" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => aportes.Persona)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Observacion:</label>
+                    <InputText @bind-Value="aportes.Observacion" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => aportes.Observacion)" />
+                </div>
+                <div class="col-md-6">
+                    <label>Monto:</label>
+                    <InputNumber @bind-Value="aportes.Monto" class="form-control"></InputNumber>
+                    <ValidationMessage For="@(() => aportes.Monto)" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
+            <button class="btn btn-success">Guardar <i class="oi oi-document" /></button>
+            <button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+        </div>
+    </div>
+</EditForm>
+
+@code 
+{
+    [Parameter]
+    public int AporteId { get; set; }
+
+    public Aportes aportes { get; set; } = new Aportes();
+
+    protected override void OnInitialized()
+    {
+        if(AporteId > 0)
+        {
+            aportes.AporteId = AporteId;
+            Buscar();
+        }
+    }
+
+    public void Buscar()
+    {
+        var aporteEncontrado = aportesBLL.Buscar(aportes.AporteId);
+        if(aporteEncontrado != null)
+        {
+            this.aportes = aporteEncontrado;
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No se encontro ningun Aporte",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            this.Nuevo();
+        }
+    }
+
+    public void Nuevo()
+    {
+        this.aportes = new Aportes();
+    }
+
+    public bool Validar()
+    {
+        return string.IsNullOrEmpty(aportes.Observacion) || (aportes.AporteId < 0) 
+                || (aportes.Monto <= 0) || string.IsNullOrEmpty(aportes.Persona);
+    }
+
+    public void Guardar()
+    {
+        if(Validar())
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Revise los campos",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        var guardo = aportesBLL.Guardar(this.aportes);
+        if(guardo)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "Aporte Guardado correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            this.Nuevo();
+        }
+    }
+
+    public void Eliminar()
+    {
+        var elimino = aportesBLL.Eliminar(this.aportes);
+        if(aportesBLL.Existe(aportes.AporteId) && elimino)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Validacion",
+                    Detail = "Aporte eliminado correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            this.Nuevo();
+        }
+    }
+
+}
