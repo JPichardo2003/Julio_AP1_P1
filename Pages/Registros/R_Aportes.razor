@@ -29,8 +29,8 @@
                 </div>
                 <div class="col-md-6">
                     <label>Observacion:</label>
-                    <InputText @bind-Value="aportes.Observacion" class="form-control"></InputText>
-                    <ValidationMessage For="@(() => aportes.Observacion)" />
+                    <InputText @bind-Value="aportes.Observación" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => aportes.Observación)" />
                 </div>
                 <div class="col-md-6">
                     <label>Monto:</label>
@@ -91,7 +91,7 @@
 
     public bool Validar()
     {
-        return string.IsNullOrEmpty(aportes.Observacion) || (aportes.AporteId < 0) 
+        return string.IsNullOrEmpty(aportes.Observación) || (aportes.AporteId < 0) 
                 || (aportes.Monto <= 0) || string.IsNullOrEmpty(aportes.Persona);
     }
 
@@ -126,8 +126,7 @@
 
     public void Eliminar()
     {
-        var elimino = aportesBLL.Eliminar(this.aportes);
-        if(aportesBLL.Existe(aportes.AporteId) && elimino)
+        if(aportesBLL.Existe(aportes.AporteId) && aportesBLL.Eliminar(this.aportes))
         {
             var mensaje = new NotificationMessage
                 {
@@ -138,6 +137,19 @@
                 };
             notificationService.Notify(mensaje);
             this.Nuevo();
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "No hay nada para Eliminar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            this.Nuevo();
+            return;
         }
     }
 
