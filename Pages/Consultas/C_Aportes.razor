@@ -1,6 +1,7 @@
 ﻿@page "/ConsultaAporte";
 
 @inject AportesBLL aportesBLL;
+@inject NotificationService notificationService;
 
 <div class="card-header row">
     <div class="col-md-4">
@@ -14,13 +15,11 @@
     <label>Filtrar Por:</label>
     <div class="col-md-6 input-group filter-input">
         <InputSelect @bind-Value="Filtro" class="form-select">
-            <option value="0">Fecha</option>
             <option value="1">Aporte Id</option>
             <option value="2">Persona</option>
         </InputSelect>
         <div class="input-group-append">
             <button type="button" class="btn btn-dark oi oi-magnifying-glass" @onclick="Buscar"></button>
-            <button type="button" class="btn btn-dark oi oi-reload" @onclick="Reiniciar"></button>
         </div>
     </div>
     <div class="col-md-6">
@@ -43,22 +42,26 @@
                 <th></th>
                 <th>Aporte ID</th>
                 <th>Persona</th>
+                <th>Fecha</th>
+                <th>Observación</th>
                 <th>Monto</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in ListaAportes)
+            @foreach (var aportes in ListaAportes)
             {
                 <tr>
-                    <td><a href="RegistroAporte/@item.AporteId">Ver</a></td>
-                    <td>@item.AporteId</td>
-                    <td>@item.Persona</td>
-                    <td>@item.Monto</td>
+                    <td><a href="RegistroAporte/@aportes.AporteId">Ver</a></td>
+                    <td>@aportes.AporteId</td>
+                    <td>@aportes.Persona</td>
+                    <td>@aportes.Fecha.ToString("MM/dd/yyyy")</td>
+                    <td>@aportes.Observación</td>
+                    <td>@aportes.Monto</td>
                 </tr>
-
-                MontoTotal += item.Monto;
             }
             <tr>
+                <td>Conteo: @Conteo</td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -75,6 +78,7 @@
     public Aportes aportes { get; set; } = new Aportes();
     public List<Aportes> ListaAportes { get; set; } = new List<Aportes>();
     public float MontoTotal { get; set; }
+    public int Conteo { get; set; }
 
     public DateTime Desde { get; set; }
     public DateTime Hasta { get; set; }
@@ -88,26 +92,13 @@
 
     public void Buscar()
     {
-        MontoTotal = 0;
-        if (Filtro == 0)
-        {
-            ListaAportes = aportesBLL.Listar(l => l.Fecha >= Desde.Date && l.Fecha <= Hasta);
-        }
-        else
-        if (Filtro == 1)
-        {
+        if (Filtro == 1 && aportes.AporteId > 0)
             ListaAportes = aportesBLL.Listar(l => l.AporteId == aportes.AporteId && l.Fecha >= Desde.Date && l.Fecha <= Hasta);
-        }
         else
-        if (Filtro == 2)
-        {
-            ListaAportes = aportesBLL.Listar(l => l.Persona == aportes.Persona && l.Fecha >= Desde.Date && l.Fecha <= Hasta);
-        }
-    }
+        if (Filtro == 2 && !string.IsNullOrEmpty(aportes.Persona))
+            ListaAportes = aportesBLL.Listar(l => l.Persona!.ToLower() == aportes.Persona!.ToLower() && l.Fecha >= Desde.Date && l.Fecha <= Hasta);
+        else
+            ListaAportes = aportesBLL.Listar(l => true);
 
-    public void Reiniciar()
-    {
-        MontoTotal = 0;
-        ListaAportes = aportesBLL.Listar(a => true);
     }
 }
