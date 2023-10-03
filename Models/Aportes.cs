@@ -11,11 +11,11 @@ namespace Julio_AP1_P1.Models
         public DateTime Fecha { get; set; }
 
         [Required(ErrorMessage = "Campo Obligatorio")]
-        [RegularExpression(@"^[a-zA-Z]+$",ErrorMessage ="Este campo no acepta digitos")]
+        [RegularExpression(@"^[a-zA-Z\s]+$",ErrorMessage ="Este campo no acepta digitos")]
         public string? Persona { get; set; }
 
         [Required(ErrorMessage = "Campo Obligatorio")]
-        public string? Observacion { get; set; }
+        public string? Observación { get; set; }
 
         [Required(ErrorMessage = "Campo Obligatorio")]
         [Range(1,float.MaxValue, ErrorMessage ="Este Campo no puede ser <=0")]
