@@ -88,6 +88,10 @@
         ListaAportes = aportesBLL.Listar(a => true);
         Desde = DateTime.Now.AddMonths(-1);
         Hasta = DateTime.Now;
+        Conteo = ListaAportes.Count;
+        MontoTotal = ListaAportes.Sum(m => m.Monto);
+
+
     }
 
     public void Buscar()
@@ -99,6 +103,7 @@
             ListaAportes = aportesBLL.Listar(l => l.Persona!.ToLower() == aportes.Persona!.ToLower() && l.Fecha >= Desde.Date && l.Fecha <= Hasta);
         else
             ListaAportes = aportesBLL.Listar(l => true);
-
+        Conteo = ListaAportes.Count;
+        MontoTotal = ListaAportes.Sum(m => m.Monto);
     }
 }
